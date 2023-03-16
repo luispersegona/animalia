@@ -1,0 +1,62 @@
+class Menu(discord.ui.View):
+    def __init__(self, pages):
+        super().__init__()
+        self.pages = pages
+        self.current_page = 0
+
+    async def update_page(self):
+        page = self.pages[self.current_page]
+        embed = page.set_footer(text=f'Página {self.current_page+1}/{len(self.pages)} • Bot feito por [seu nome aqui]')
+        await self.message.edit(embed=embed)
+
+    @discord.ui.button(label='Voltar', style=discord.ButtonStyle.gray)
+    async def on_back_button_click(self, button: discord.ui.Button, interaction: discord.Interaction):
+        if self.current_page == 0:
+            return
+        self.current_page -= 1
+        await self.update_page()
+        await interaction.response.defer()
+
+    @discord.ui.button(label='Seguinte', style=discord.ButtonStyle.gray)
+    async def on_next_button_click(self, button: discord.ui.Button, interaction: discord.Interaction):
+        if self.current_page == len(self.pages)-1:
+            return
+        self.current_page += 1
+        await self.update_page()
+        await interaction.response.defer()
+
+    @discord.ui.button(label='Fechar', style=discord.ButtonStyle.red)
+    async def on_close_button_click(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.message.delete()
+
+@bot.command()
+async def criar(ctx):
+    page1 = discord.Embed(title='Página 1', description='Bem-vindo(a) ao meu bot Discord!', color=discord.Color.blue())
+    page1.add_field(name='Agradecimentos', value='Obrigado por usar meu bot. Espero que você encontre tudo o que precisa aqui!', inline=False)
+    page1.add_field(name='Instruções', value='Para começar, siga as instruções na próxima aba.', inline=False)
+    page1.set_footer(text='Bot feito por [seu nome aqui]')
+
+    page2 = discord.Embed(title='Página 2', description='Configuração', color=discord.Color.green())
+    page2.add_field(name='Etapa 1', value='Primeiro, execute o comando [seu comando aqui] para definir suas configurações.', inline=False)
+    page2.add_field(name='Etapa 2', value='Em seguida, execute o comando [seu comando aqui] para configurar outras opções.', inline=False)
+    page2.set_footer(text='Bot feito por [seu nome aqui]')
+
+    page3 = discord.Embed(title='Página 3', description='Recursos', color=discord.Color.purple())
+    page3.add_field(name='Recurso 1', value='Este bot possui um recurso incrível que você pode usar para [descrição do recurso 1].', inline=False)
+    page3.add_field(name='Recurso 2', value='Outra grande coisa que você pode fazer é [descrição do recurso 2].', inline=False)
+    page3.set_footer(text='Bot feito por [seu nome aqui]')
+
+    page4 = discord.Embed(title='Página 4', description='Suporte', color=discord.Color.orange())
+    page4.add_field(name='Problemas?', value='Se você encontrar algum problema ao usar o bot, sinta-se à vontade para entrar em contato comigo.', inline=False)
+    page4.add_field(name='Suporte', value='Você pode obter suporte em [insira o seu servidor de suporte aqui].', inline=False)
+    page4.set_footer(text='Bot feito por [seu nome aqui]')
+
+    page5 = discord.Embed(title='Página 5', description='Agradecimentos finais', color=discord.Color.dark_gold())
+    page5.add_field(name='Mais uma vez, obrigado!', value='Obrigado por usar meu bot! Espero que tenha uma ótima experiência!', inline=False)
+    page5.add_field(name='Siga-me', value='Para atualizações futuras e novidades, siga-me em [insira o seu nome de usuário / link do Twitter / etc. aqui]!', inline=False)
+    page5.set_footer(text='Bot feito por [seu nome aqui]')
+
+    menu = Menu([page1, page2, page3, page4, page5])
+
+    message = await ctx.send(embed=page1, view=menu)
+    menu.message = message
